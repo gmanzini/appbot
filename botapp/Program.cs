@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using BOTapp.Modules;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,20 +15,25 @@ namespace BOTapp
     {
         private DiscordSocketClient _client;
         private CommandService _commands;
+        private AudioService _audio;
         private IServiceProvider _services;
         public async Task RunBotAsync()
         {
             _client = new DiscordSocketClient();
             _commands = new CommandService();
+            _audio = new AudioService();
             _services = new ServiceCollection()
                 .AddSingleton(_client)
                 .AddSingleton(_commands)
+                .AddSingleton(_audio)
                 .BuildServiceProvider();
-            string token = "Njk2MzkzNzgxNzQxNzQ4MzI1.XooFlQ.G8nVXtjl6ypnORAEpYs3sYKzzbc";
+            string token = "Njk2MzkzNzgxNzQxNzQ4MzI1.Xoqm0g.va6seX5r5-RsMdpLmhZ18d3XvkQ";
             _client.Log += _client_Log;
             await RegisterCommandAsync();
             await _client.LoginAsync(Discord.TokenType.Bot, token);
             await _client.StartAsync();
+            
+            await _client.SetGameAsync("=help // made by Manzini");
             await Task.Delay(-1);
         }
 
@@ -52,9 +58,6 @@ namespace BOTapp
             if(message.HasStringPrefix("=",ref argPos))
             {
                 var result = await _commands.ExecuteAsync(context, argPos, _services);
-                var msgs = context.Channel.GetMessagesAsync();
-                var lastmsg = msgs.Last();
-                await context.Channel.DeleteMessageAsync((ulong)lastmsg.Id);
                 if (!result.IsSuccess) Console.WriteLine(result.ErrorReason);
             }
         }
